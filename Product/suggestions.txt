@@ -1,0 +1,253 @@
+Redis Cache Implementation for Product Detail API
+==================================================
+
+Implementation Date: 2025-12-02
+
+OVERVIEW:
+---------
+Implemented Redis caching for the getProductDetail API endpoint to improve performance by caching product details and reducing database queries.
+
+CHANGES MADE:
+-------------
+
+1. SearchApplication.java
+   - Added @EnableCaching annotation to enable Spring Cache abstraction
+   - This activates caching support in the Spring Boot application
+
+2. SearchServiceImpl.java
+   - Added @Cacheable annotation to getProductDetail() method
+   - Cache configuration:
+     * Cache name: "productDetail"
+     * Cache key: SKU ID (parameter #skuId)
+     * Condition: Only cache if result is not null (unless = "#result == null")
+   - Updated log message to indicate database fetch
+
+3. CacheConfig.java (NEW FILE)
+   - Created Redis cache configuration class
+   - Configured CacheManager bean with:
+     * Default TTL: 10 minutes (600000ms)
+     * Key serializer: StringRedisSerializer
+     * Value serializer: GenericJackson2JsonRedisSerializer (for JSON serialization)
+     * Cache prefix: "xlms:cache:" (matches application.properties)
+     * Specific configuration for "productDetail" cache
+
+CACHE BEHAVIOR:
+---------------
+- First request: Product is fetched from MongoDB and stored in Redis cache
+- Subsequent requests: Product is retrieved from Redis cache (faster response)
+- Cache expiration: 10 minutes (configurable via application.properties)
+- Cache key format: "xlms:cache:productDetail::<skuId>"
+
+BENEFITS:
+---------
+1. Improved Performance: Reduced database load and faster response times
+2. Scalability: Redis handles high concurrent requests efficiently
+3. Cost Reduction: Fewer database queries reduce MongoDB load
+4. Better User Experience: Faster API response times
+
+CONFIGURATION:
+-------------
+Redis configuration is already set in application.properties:
+- spring.redis.host=localhost
+- spring.redis.port=6379
+- spring.cache.type=redis
+- spring.cache.redis.time-to-live=600000 (10 minutes)
+- spring.cache.redis.key-prefix=xlms:cache:
+
+API ENDPOINT:
+-------------
+GET /api/search/get/detailById?skuId=<skuId>
+
+The endpoint now uses Redis cache automatically. No changes required in the controller.
+
+TESTING:
+--------
+To verify cache is working:
+1. Make first request to get product detail - should see log "Fetching the product Detail from database"
+2. Make second request with same SKU - should NOT see database log (served from cache)
+3. Wait 10 minutes or clear cache - next request will fetch from database again
+
+FUTURE ENHANCEMENTS:
+--------------------
+- Consider adding @CacheEvict for product update/delete operations
+- Add cache statistics monitoring
+- Implement cache warming strategies
+- Add conditional caching based on product status
+
+
+================================================================================
+List Products API with Pagination
+================================================================================
+
+Implementation Date: 2025-12-02
+
+OVERVIEW:
+---------
+Created a new API endpoint to list all products with pagination support. The endpoint
+returns the same response structure as the search product API for consistency.
+
+CHANGES MADE:
+-------------
+
+1. SearchService.java (Interface)
+   - Added method: listAllProducts(int page, int size, String sort, String order)
+   - Returns: Response<SearchResultDTO> (same as search product)
+
+2. SearchServiceImpl.java
+   - Implemented listAllProducts() method
+   - Uses ProductRepository.findAll(Pageable) for fetching all products
+   - Supports pagination, sorting, and ordering
+   - Converts Product entities to SearchQueryDTO using existing conversion method
+   - Returns same response structure as search product API
+
+3. SearchController.java
+   - Added GET endpoint: /api/search/products
+   - Query Parameters:
+     * page (optional, default: 0) - Page number (0-indexed)
+     * size (optional, default: 10) - Number of items per page
+     * sort (optional) - Field name to sort by
+     * order (optional, default: "asc") - Sort order ("asc" or "desc")
+   - Returns: ResponseEntity<Response<SearchResultDTO>>
+
+API ENDPOINT:
+-------------
+GET /api/search/products?page={page}&size={size}&sort={field}&order={asc|desc}
+
+Examples:
+- GET /api/search/products
+  (Returns first 10 products, no sorting)
+
+- GET /api/search/products?page=0&size=20
+  (Returns first 20 products)
+
+- GET /api/search/products?page=1&size=10&sort=name&order=asc
+  (Returns second page, 10 items, sorted by name ascending)
+
+- GET /api/search/products?page=0&size=50&sort=price.amount&order=desc
+  (Returns first 50 products, sorted by price descending)
+
+RESPONSE STRUCTURE:
+-------------------
+Same as search product API:
+{
+  "success": true,
+  "code": 200,
+  "message": "Products listed successfully",
+  "data": {
+    "content": [
+      {
+        "sku": "SKU-00000001",
+        "name": "Product Name",
+        "description": "Product Description",
+        "brand": "Brand Name",
+        "status": "ACTIVE",
+        "priceDetail": {
+          "amount": 10000,
+          "discountedAmount": 9000
+        },
+        "primaryImage": "https://example.com/image.jpg"
+      }
+    ],
+    "paginationDTO": {
+      "page": 0,
+      "size": 10,
+      "totalPages": 5000,
+      "totalElements": 50000
+    }
+  }
+}
+
+FEATURES:
+---------
+1. Pagination Support: Navigate through large product datasets
+2. Sorting: Sort by any product field (name, brand, price.amount, etc.)
+3. Ordering: Ascending or descending sort order
+4. Default Values: Sensible defaults for all optional parameters
+5. Consistent Response: Same structure as search API for easy integration
+6. Error Handling: Proper exception handling with error responses
+
+TECHNICAL DETAILS:
+------------------
+- Uses Spring Data MongoDB's Pageable interface
+- Leverages existing convertToSearchQueryDTO() method for consistency
+- Uses existing buildSort() method for sort configuration
+- No filtering applied - returns all products (unlike search API)
+- Efficient pagination using MongoDB's skip and limit
+
+PERFORMANCE:
+------------
+- Efficient pagination using MongoDB native pagination
+- Can handle large datasets (50,000+ products)
+- Consider adding caching for frequently accessed pages in future
+
+
+================================================================================
+Error Handling Improvement for Product Detail API
+================================================================================
+
+Implementation Date: 2025-12-02
+
+OVERVIEW:
+---------
+Improved error handling for the getProductDetail API to return proper error
+responses instead of throwing RuntimeException. This provides better API
+consistency and user experience.
+
+CHANGES MADE:
+-------------
+
+1. SearchServiceImpl.java
+   - Changed getProductDetail() method to return null instead of throwing exception
+   - Added null check after repository findById()
+   - Added warning log when product is not found
+   - Method now gracefully handles missing products
+
+2. SearchController.java
+   - Updated getProductDetail() endpoint to handle null responses
+   - Added proper error response for missing SKU ID (400 Bad Request)
+   - Added proper error response for product not found (404 Not Found)
+   - Changed return type to ResponseEntity<?> to support both success and error responses
+   - Error responses use Response<T> wrapper for consistency
+
+ERROR RESPONSES:
+----------------
+
+1. Missing SKU ID:
+   HTTP Status: 400 Bad Request
+   Response:
+   {
+     "success": false,
+     "code": 400,
+     "message": "SKU ID is required and cannot be empty",
+     "data": null
+   }
+
+2. Product Not Found:
+   HTTP Status: 404 Not Found
+   Response:
+   {
+     "success": false,
+     "code": 404,
+     "message": "Product not found for SKU: <skuId>",
+     "data": null
+   }
+
+3. Success Response:
+   HTTP Status: 200 OK
+   Response: ProductDetailDTO object (direct, not wrapped)
+
+BENEFITS:
+---------
+1. Better API Design: Proper HTTP status codes (400, 404) instead of 500
+2. User-Friendly: Clear error messages explaining what went wrong
+3. Consistent: Error responses follow standard format
+4. No Exceptions: Graceful handling without throwing runtime exceptions
+5. Better Logging: Warning logs for missing products help with debugging
+
+TESTING:
+--------
+- Test with valid SKU: Should return 200 OK with product details
+- Test with invalid SKU: Should return 404 Not Found with error message
+- Test with empty SKU: Should return 400 Bad Request with error message
+- Test with null SKU: Should return 400 Bad Request with error message
+
