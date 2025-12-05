@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.project.Search.Controller.SearchControllerTest
+-------------------------------------------------------------------------------
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.095 s -- in com.project.Search.Controller.SearchControllerTest

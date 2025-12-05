@@ -251,3 +251,291 @@ TESTING:
 - Test with empty SKU: Should return 400 Bad Request with error message
 - Test with null SKU: Should return 400 Bad Request with error message
 
+
+================================================================================
+JUnit Tests with Mockito for Controller and Service Implementation
+================================================================================
+
+Implementation Date: 2025-12-04
+
+OVERVIEW:
+---------
+Implemented comprehensive JUnit tests using Mockito framework for SearchController
+and SearchServiceImpl classes. Tests include both happy flow (success scenarios)
+and negative flow (error scenarios) for all endpoints and service methods.
+
+FILES CREATED:
+-------------
+
+1. SearchControllerTest.java
+   Location: src/test/java/com/project/Search/Controller/SearchControllerTest.java
+   - Tests for SearchController with @Mock annotation for SearchService
+   - Uses @InjectMocks for SearchController
+   - Uses @ExtendWith(MockitoExtension.class) for Mockito support
+
+2. SearchServiceImplTest.java
+   Location: src/test/java/com/project/Search/Service/Impl/SearchServiceImplTest.java
+   - Tests for SearchServiceImpl with @Mock annotations for repositories
+   - Uses @Mock for ProductRepository and CategoryRepository
+   - Uses @InjectMocks for SearchServiceImpl
+   - Uses @ExtendWith(MockitoExtension.class) for Mockito support
+
+TEST COVERAGE:
+--------------
+
+SearchControllerTest - 10 Test Cases:
+1. Happy Flow: Search Product - Returns 200 OK with search results
+2. Negative Flow: Search Product - Empty query returns 400 Bad Request
+3. Negative Flow: Search Product - Null query returns 400 Bad Request
+4. Negative Flow: Search Product - Service exception returns 500 Internal Server Error
+5. Happy Flow: Get Product Detail - Returns 200 OK with product details
+6. Negative Flow: Get Product Detail - Empty SKU ID returns 400 Bad Request
+7. Negative Flow: Get Product Detail - Product not found returns 404 Not Found
+8. Happy Flow: List All Products - Returns 200 OK with paginated products
+9. Negative Flow: List All Products - Service exception returns 500 Internal Server Error
+10. Happy Flow: Get Category Detail - Returns 200 OK with category details
+11. Negative Flow: Get Category Detail - Empty category ID returns 400 Bad Request
+
+SearchServiceImplTest - 9 Test Cases:
+1. Happy Flow: Get Product Detail - Returns product detail DTO
+2. Negative Flow: Get Product Detail - Product not found returns null
+3. Happy Flow: Get Category Detail - Returns category DTO
+4. Negative Flow: Get Category Detail - Category not found throws RuntimeException
+5. Happy Flow: Get Product Search - Returns search results with pagination
+6. Negative Flow: Get Product Search - Empty search results returns empty content
+7. Happy Flow: List All Products - Returns all products with pagination
+8. Negative Flow: List All Products - Empty repository returns empty results
+9. Happy Flow: Get Product Search - Handles default pagination values
+10. Happy Flow: Get Product Search - Handles product with primary image
+
+MOCKING STRATEGY:
+-----------------
+- Used @Mock annotation to mock dependencies (SearchService, ProductRepository, CategoryRepository)
+- Used @InjectMocks to inject mocked dependencies into the class under test
+- Used when().thenReturn() to define mock behavior
+- Used verify() to ensure methods are called with correct parameters
+- Used times() to verify method invocation counts
+
+TEST STRUCTURE:
+---------------
+Each test follows AAA pattern (Arrange-Act-Assert):
+1. Arrange: Setup test data and mock responses
+2. Act: Execute the method under test
+3. Assert: Verify the results and behavior
+
+DEPENDENCIES:
+-------------
+- JUnit 5 (junit-jupiter) - Already included in spring-boot-starter-test
+- Mockito - Already included in spring-boot-starter-test
+- MockitoExtension - For JUnit 5 integration
+
+RUNNING TESTS:
+--------------
+To run all tests:
+  mvn test
+
+To run specific test class:
+  mvn test -Dtest=SearchControllerTest
+  mvn test -Dtest=SearchServiceImplTest
+
+To run specific test method:
+  mvn test -Dtest=SearchControllerTest#testSearchProduct_HappyFlow
+
+BENEFITS:
+---------
+1. Comprehensive Coverage: Tests cover all endpoints and service methods
+2. Happy and Negative Flows: Both success and error scenarios are tested
+3. Isolation: Tests are isolated using mocks, no database or external dependencies
+4. Fast Execution: Mock-based tests run quickly
+5. Maintainability: Clear test structure with descriptive names
+6. Documentation: Tests serve as documentation for expected behavior
+7. Regression Prevention: Tests catch breaking changes early
+
+TEST FEATURES:
+--------------
+- Uses @DisplayName for readable test descriptions
+- Proper assertion messages for better debugging
+- Verifies HTTP status codes, response bodies, and error messages
+- Verifies service method invocations and parameters
+- Tests edge cases like null values, empty strings, and exceptions
+- Tests pagination, sorting, and filtering scenarios
+
+FUTURE ENHANCEMENTS:
+--------------------
+- Add performance tests for large datasets
+- Add test coverage reports (JaCoCo)
+- Add parameterized tests for multiple scenarios
+- Add tests for cache behavior
+- Add tests for concurrent access scenarios
+
+
+================================================================================
+Integration Tests with Testcontainers for Controller and Service
+================================================================================
+
+Implementation Date: 2025-12-05
+
+OVERVIEW:
+---------
+Implemented comprehensive integration tests using Testcontainers for MongoDB.
+These tests verify the full application stack from REST endpoints through service
+layer to database, ensuring end-to-end functionality works correctly.
+
+FILES CREATED:
+-------------
+
+1. SearchControllerIntegrationTest.java
+   Location: src/test/java/com/project/Search/Controller/SearchControllerIntegrationTest.java
+   - Integration tests for SearchController REST endpoints
+   - Uses @SpringBootTest with @AutoConfigureMockMvc
+   - Uses Testcontainers MongoDB container
+   - Tests happy flow scenarios for all endpoints
+
+2. SearchServiceIntegrationTest.java
+   Location: src/test/java/com/project/Search/Service/Impl/SearchServiceIntegrationTest.java
+   - Integration tests for SearchServiceImpl
+   - Uses @SpringBootTest to load full Spring context
+   - Uses Testcontainers MongoDB container
+   - Tests happy flow scenarios for all service methods
+
+DEPENDENCIES ADDED:
+-------------------
+1. testcontainers-mongodb - MongoDB container for testing
+2. testcontainers-junit-jupiter - JUnit 5 integration
+3. testcontainers-bom - Bill of Materials for version management
+
+Added to pom.xml:
+- org.testcontainers:mongodb (test scope)
+- org.testcontainers:junit-jupiter (test scope)
+- org.testcontainers:testcontainers-bom (dependencyManagement)
+
+TEST COVERAGE:
+--------------
+
+SearchControllerIntegrationTest - 6 Test Cases (Happy Flow Only):
+1. Happy Flow: Search Product - Returns 200 OK with search results
+2. Happy Flow: Get Product Detail - Returns 200 OK with product details
+3. Happy Flow: Get Category Detail - Returns 200 OK with category details
+4. Happy Flow: List All Products - Returns 200 OK with paginated products
+5. Happy Flow: List All Products with default parameters - Returns 200 OK
+6. Happy Flow: Search Product with pagination - Returns paginated results
+
+SearchServiceIntegrationTest - 8 Test Cases (Happy Flow Only):
+1. Happy Flow: Get Product Detail - Returns product detail from database
+2. Happy Flow: Get Category Detail - Returns category from database
+3. Happy Flow: Get Product Search - Returns search results from database
+4. Happy Flow: Get Product Search with brand filter - Returns filtered results
+5. Happy Flow: List All Products - Returns all products from database
+6. Happy Flow: List All Products with pagination - Returns paginated results
+7. Happy Flow: List All Products with sorting - Returns sorted results
+8. Happy Flow: Get Product Search with multiple results - Returns all matching products
+
+TECHNICAL DETAILS:
+------------------
+- Uses Testcontainers to spin up a real MongoDB container (mongo:7.0)
+- Container is automatically started before tests and stopped after
+- Uses @DynamicPropertySource to configure MongoDB connection dynamically
+- Disables Redis cache for integration tests (uses simple cache)
+- Each test method runs with a clean database (setup in @BeforeEach)
+- Tests use real database operations, not mocks
+
+TEST SETUP:
+-----------
+1. MongoDB Container:
+   - Uses @Container annotation for static MongoDB container
+   - Container starts once per test class
+   - Uses mongo:7.0 Docker image
+
+2. Database Configuration:
+   - @DynamicPropertySource sets MongoDB URI from container
+   - Cache type set to "simple" to avoid Redis dependency
+   - Database is cleared before each test
+
+3. Test Data:
+   - Created in @BeforeEach method
+   - Includes sample products and categories
+   - Data is isolated per test method
+
+BENEFITS:
+---------
+1. Real Database Testing: Tests run against actual MongoDB instance
+2. End-to-End Validation: Tests entire request/response cycle
+3. No External Dependencies: Testcontainers manages MongoDB automatically
+4. Isolated Tests: Each test has clean database state
+5. Realistic Scenarios: Tests behave like production environment
+6. Fast Execution: Container reuse across tests
+7. CI/CD Ready: Works in any environment with Docker
+
+RUNNING TESTS:
+--------------
+Prerequisites:
+- Docker must be installed and running
+- Docker daemon must be accessible
+
+To run all integration tests:
+  mvn test
+
+To run specific integration test class:
+  mvn test -Dtest=SearchControllerIntegrationTest
+  mvn test -Dtest=SearchServiceIntegrationTest
+
+To run only integration tests:
+  mvn test -Dtest=*IntegrationTest
+
+To run only unit tests (excluding integration):
+  mvn test -Dtest='!*IntegrationTest'
+
+TEST EXECUTION FLOW:
+--------------------
+1. Testcontainers starts MongoDB container
+2. Spring Boot application context loads
+3. @BeforeEach sets up test data in database
+4. Test method executes against real database
+5. Assertions verify results
+6. Database is cleaned for next test
+
+INTEGRATION TEST FEATURES:
+--------------------------
+- Tests REST endpoints with MockMvc
+- Tests service layer with real repositories
+- Validates JSON responses
+- Verifies HTTP status codes
+- Tests pagination functionality
+- Tests sorting functionality
+- Tests filtering functionality
+- Validates data transformation (Entity to DTO)
+
+COMPARISON WITH UNIT TESTS:
+----------------------------
+Unit Tests (Mockito):
+- Fast execution
+- Isolated components
+- No external dependencies
+- Mock dependencies
+- Test individual methods
+
+Integration Tests (Testcontainers):
+- Slower execution
+- Full stack testing
+- Real database
+- Real dependencies
+- Test complete workflows
+
+BEST PRACTICES:
+---------------
+1. Use unit tests for business logic validation
+2. Use integration tests for end-to-end scenarios
+3. Keep integration tests focused on happy flows
+4. Use @BeforeEach to ensure clean state
+5. Use descriptive test names with @DisplayName
+6. Test one scenario per test method
+
+FUTURE ENHANCEMENTS:
+--------------------
+- Add negative flow integration tests
+- Add performance/load tests
+- Add tests for cache behavior with Redis
+- Add tests for concurrent access
+- Add tests for large datasets
+- Add tests for error scenarios
+

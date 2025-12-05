@@ -1,8 +1,14 @@
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Config/CacheConfig.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Config/SwaggerConfig.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Controller/SearchController.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/CategoryDTO.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/PaginationDTO.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/ProductDetailDTO.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/Response.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/SearchQueryDTO.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/SearchRequestDTO.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/SearchResponseDTO.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DTO/SearchResultDTO.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/DataInsertionScript.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Entity/Category.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Entity/CategoryMapping.java
@@ -14,7 +20,9 @@
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Entity/Specification.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Entity/Stock.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Repository/CategoryRepository.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Repository/Impl/SearchCustomRepositoryImpl.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Repository/ProductRepository.java
+/Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Repository/SearchCustomRepository.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/SearchApplication.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Service/CategoryService.java
 /Users/anirudhbansal/Desktop/Search/src/main/java/com/project/Search/Service/Impl/SearchServiceImpl.java
